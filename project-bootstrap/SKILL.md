@@ -44,12 +44,16 @@ En el perfil REST incluye un comando documentado y versionado para cargar datos 
 
 ## Hosting
 
-Ofrece dos rutas de hosting. Incluye los servicios que requieran los perfiles elegidos. Para el perfil REST, mantén el contrato OpenAPI, PostgreSQL, las migraciones y el comando de seeds comunes a ambas.
+Usa los servicios siguientes según los perfiles elegidos y las necesidades del proyecto. Reserva AWS para una migración posterior y separada del bootstrap.
 
-- **Todo en AWS.** Cognito para identidad, RDS for PostgreSQL para persistencia, Amplify Hosting para la web, ECR y ECS/Fargate para la API en contenedor, S3 para archivos y CodeBuild con CodePipeline para CI/CD. Dimensiona el ambiente de desarrollo según lo que necesita operar y calcula también los cargos de red y recursos que quedan encendidos.
-- **Servicios externos.** Usa WorkOS AuthKit para identidad, Neon para PostgreSQL, Render para ejecutar la API FastAPI en contenedor, Cloudflare Pages para la web estática de Vite, Cloudflare R2 para archivos y GitHub Actions para CI/CD de desarrollo. Mantén los archivos privados cuando corresponda y autoriza su acceso desde el backend. Verifica cuotas, suspensión por inactividad y límites de archivos antes de provisionar los servicios.
+- **Identidad:** WorkOS AuthKit. Comprueba los permisos de negocio en el backend.
+- **PostgreSQL:** Neon. Conserva las migraciones versionadas y el comando de seeds.
+- **API FastAPI en contenedor:** Render.
+- **Web estática de Vite:** Cloudflare Pages.
+- **Archivos:** Cloudflare R2. Mantén los archivos privados cuando corresponda y autoriza su acceso desde el backend.
+- **CI/CD de desarrollo:** GitHub Actions.
 
-Mantén los permisos de negocio en el backend en ambas rutas. Si aún no hay proveedor o destino, entrega comandos reproducibles de build, arranque y verificación. Configura la CI si ya se conoce dónde vive el repositorio y deja documentados el destino, los permisos y las variables que faltan para configurar el despliegue.
+Verifica cuotas, suspensión por inactividad y límites de archivos antes de provisionar. Si aún no hay destino de desarrollo, entrega comandos reproducibles de build, arranque y verificación. Documenta las cuentas, permisos y variables pendientes para habilitar el despliegue.
 
 ## CI/CD de desarrollo
 
