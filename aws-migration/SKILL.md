@@ -22,7 +22,7 @@ Inventaría por ambiente los servicios de origen, datos, dominios, configuració
 - **Cloudflare Pages → Amplify Hosting o S3/CloudFront.** Conserva el build de Vite. Verifica rutas SPA, variables, OAuth, dominio y TLS.
 - **Cloudflare R2 → S3.** Copia por lotes, conserva claves y metadatos relevantes, compara inventario y verifica descarga autorizada. Prevé una sincronización final para escrituras durante la copia.
 - **WorkOS AuthKit → Cognito si identidad forma parte del traslado.** Comprueba qué se puede exportar. Planifica el vínculo entre identificadores antiguos y nuevos para conservar permisos y referencias. Define acceso para usuarios existentes cuando sus credenciales o sesiones no sean transferibles. Prueba login y autorización antes del cambio.
-- **GitHub Actions → AWS CodeBuild/CodePipeline cuando se solicite CI/CD íntegro en AWS.** Mantén pruebas reales por ambiente, artefactos identificables por commit y despliegue de desarrollo. El release management requiere alcance explícito.
+- **GitHub Actions → AWS CodeBuild/CodePipeline cuando se solicite CI/CD íntegro en AWS.** Mantén pruebas reales por ambiente, artefactos identificables por commit y despliegue de desarrollo.
 
 ## Verificación y corte
 

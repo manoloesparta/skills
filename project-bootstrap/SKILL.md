@@ -17,12 +17,30 @@ Entrega una base pequeña que permita ejecutar y verificar el primer flujo real 
 
 ## Perfil REST
 
-- Usa FastAPI y Pydantic como referencia. Mantén rutas delgadas que validen entradas, deleguen el comportamiento y traduzcan errores de dominio a respuestas HTTP consistentes.
-- Incluye soporte para **JSON y multipart/form-data** en la API desde el arranque. Declara en OpenAPI los formatos de cada operación según su flujo. Si una operación acepta ambos, aplica las mismas reglas de negocio a los campos compartidos. Cuando reciba archivos, valida el tipo y limita el tamaño.
-- Genera OpenAPI desde el código con identificadores de operación estables. Si un SDK evita duplicar tipos y llamadas, establece cómo regenerarlo y verifica que coincida con el contrato fuente. Corrige las discrepancias en el contrato o en la configuración del generador.
-- Lee configuración por ambiente y usa logs estructurados con contexto de la solicitud. Configura CORS explícitamente cuando el frontend y la API tengan orígenes distintos.
-- Usa **PostgreSQL** en el perfil REST, también en local y en CI. Una web sin API ni persistencia propia solo necesita el perfil web. Versiona las migraciones desde el primer esquema y deja claros los límites de transacción. Agrega filtros, orden y paginación cuando el listado los requiera.
-- Antes de exponer datos privados o acciones restringidas, autentica al actor y comprueba permisos y alcance de datos en el servidor. Un PoC local con datos sintéticos puede arrancar sin proveedor de identidad cuando su flujo sea público. Incorpora políticas centralizadas o multitenancy cuando el producto los requiera.
+Usa FastAPI y Pydantic como referencia. Mantén rutas delgadas que validen entradas, deleguen el comportamiento y traduzcan errores de dominio a respuestas HTTP consistentes. Una web sin API ni persistencia propia solo necesita el perfil web.
+
+### Checklist de la API REST
+
+Revisa los 18 puntos antes de entregar. Indica cuáles verificaste y deja un motivo concreto para los puntos condicionados que aún no apliquen.
+
+1. **JSON y form-data.** Incluye soporte para JSON y `multipart/form-data` desde el arranque. Declara los formatos por operación en OpenAPI. Si una operación acepta ambos, aplica las mismas reglas de negocio a los campos compartidos.
+2. **Configuración.** Lee valores por ambiente y documenta las variables requeridas con un ejemplo sin secretos.
+3. **Integración con la base.** Usa PostgreSQL en desarrollo, local y CI. Deja claros los límites de transacción y usa una base aislada para pruebas.
+4. **Migraciones.** Versiona el esquema desde la primera migración y deja un comando reproducible para aplicarlas. Carga los seeds por separado.
+5. **Autenticación y autorización.** Antes de exponer datos privados o acciones restringidas, autentica al actor y comprueba permisos y alcance en el servidor. En un PoC local con datos sintéticos y flujo público puede omitirse el proveedor de identidad. Amplía las políticas y el aislamiento por tenant según el producto.
+6. **Subida de archivos.** Cuando el flujo acepte archivos, limita el tamaño, valida el tipo y comprueba el acceso a los objetos privados. Usa R2 para el almacenamiento alojado.
+7. **Logs estructurados.** Registra contexto de la solicitud, resultado y errores sin incluir tokens ni datos sensibles.
+8. **Apagado ordenado.** Cuando el proceso reciba una señal de parada, deja de aceptar tráfico, permite terminar solicitudes dentro del plazo del entorno y cierra conexiones y otros recursos.
+9. **CORS.** Si web y API tienen orígenes distintos, declara los orígenes permitidos por ambiente y verifica las solicitudes del navegador.
+10. **Filtros, orden y paginación.** En los listados que lo necesiten, documenta los parámetros, usa orden estable y limita el tamaño de página.
+11. **Rate limiting.** Para endpoints públicos o costosos expuestos a abuso, define límites, el punto donde se aplican y la respuesta al rebasarlos.
+12. **Métricas.** Para una API alojada, habilita un mecanismo sencillo para observar volumen de solicitudes, latencia y errores. Usa las métricas del entorno si ya ofrecen esa visibilidad.
+13. **Especificación de API.** Genera OpenAPI desde el código con identificadores de operación estables. Si generas un SDK para evitar duplicación, documenta cómo regenerarlo y verifica que corresponda al contrato fuente.
+14. **Imagen Docker.** Incluye un Dockerfile para la API y un comando reproducible para construir y arrancar la imagen.
+15. **Entorno local de pruebas.** Documenta cómo arrancar la API con PostgreSQL aislado, aplicar migraciones y cargar los datos necesarios para probar el flujo.
+16. **Infraestructura declarativa.** Cuando haya recursos alojados que reproducir, versiona su configuración declarativa y documenta las entradas que dependen del entorno.
+17. **Despliegue semiautomático.** Cuando exista un destino de desarrollo, versiona el flujo de GitHub Actions para validar y desplegar desde la rama de integración. Deja explícito cualquier paso manual que requiera el proveedor.
+18. **Pruebas básicas de integración.** Ejecuta el flujo principal por HTTP real. Verifica persistencia mediante una lectura posterior y cubre multipart y autorización cuando formen parte del flujo. Evita las pruebas unitarias.
 
 ## Seeds
 
@@ -63,7 +81,5 @@ Versiona la configuración de CI cuando se conozca el alojamiento del repositori
 - Asigna un solo responsable de despliegue por componente y ambiente. Desactiva los disparadores automáticos que puedan publicar por su cuenta. Después de validar el commit que va a desarrollo, construye desde ese mismo commit y registra su identificador en el artefacto o resultado del despliegue. Serializa migraciones y despliegues concurrentes al mismo ambiente cuando compartan la base o el destino. Si el destino ejecuta contenedores, genera una imagen. Si hay frontend y API, despliega el componente que cambió y considera los cambios compartidos que afecten a ambos.
 - Si el servicio requiere migraciones compatibles con la versión activa, ejecuta las pendientes con el mismo artefacto del backend antes de actualizar el servicio. Para cambios incompatibles, prepara una transición de esquema por etapas o coordina una ventana de mantenimiento para actualizar el esquema y el servicio. Detén el despliegue si fallan las migraciones. Al terminar, comprueba que el servicio quedó disponible y reporta el resultado.
 - Mantén configuración y secretos separados por ambiente. Usa infraestructura declarativa cuando haga falta provisionar el destino de desarrollo. Documenta el disparador, las variables requeridas y cómo consultar el resultado.
-
-**Excluye el release management del bootstrap.** Reserva los manifiestos y aprobaciones de release, el versionado de releases y la promoción entre ambientes para proyectos que los soliciten explícitamente. Ajusta métricas, apagado ordenado y rate limiting a las necesidades de operación.
 
 Antes de entregar, verifica el arranque y el flujo de integración con los comandos documentados cuando el entorno lo permita. Informa qué se ejecutó y qué quedó sin verificar.
